@@ -24,6 +24,7 @@ include('../../config.php');
 include($FANNIE_ROOT.'src/mysql_connect.php');
 include($FANNIE_ROOT.'src/tmp_dir.php');
 include($FANNIE_ROOT.'auth/login.php');
+include($FANNIE_ROOT.'classlib2.0/lib/FormLib.php');
 
 
 /* --COMMENTS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -121,16 +122,35 @@ echo "<br /><br />";
 $jobs = scan_scripts($FANNIE_ROOT.'cron',array());
 $tab = read_crontab();
 
+$mode = FormLib::get_form_value('mode','simple');
+
 echo "<form action=\"{$_SERVER['PHP_SELF']}\" method=\"post\">";
+printf ('<input type="hidden" name="mode" value="%s" />',$mode);
+if ($mode == 'simple'){
+	echo '<a href="index.php?mode=advanced">Switch to Advanced View</a><br />';
+}
+else {
+	echo '<a href="index.php?mode=simple">Switch to Simple View</a><br />';
+}
 echo "<b>E-mail address</b>: <input name=\"email\" value=\"{$tab['email']}\" /><br />";
 echo "<table cellspacing=\"0\" cellpadding=\"4\" border=\"1\">";
 echo "<tr><th>Enabled</th><th>Min</th><th>Hour</th><th>Day</th><th>Month</th><th>Wkdy</th><th>Command/Help</th></tr>";
 $i = 0;
 foreach($jobs as $job){
 	$shortname = substr($job,strlen($FANNIE_ROOT."cron/"));
+	$classname = rtrim($shortname,'.php');
+	include($job);
+	if (!class_exists($classname)) continue;
+	$inst = new $classname();
 
 	$cmd = "cd {$FANNIE_ROOT}cron && php ./{$shortname} >> {$FANNIE_ROOT}logs/dayend.log";
 
+	$simple = simple_row($shortname,$inst->nice_name,$cmd,$tab,$i);
+	if ($simple !== False && $mode == 'simple')
+		echo $simple;
+	else
+		echo advanced_row($shortname,$inst->nice_name,$cmd,$tab,$i);
+	/*
 	// defaults are set as once a year so someone doesn't accidentallly
 	// start firing a job off every minute
 	printf('<tr>
@@ -150,8 +170,9 @@ foreach($jobs as $job){
 		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['month']:'1'),
 		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['wkdy']:'*'),
 		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['cmd']:$cmd),
-		base64_encode($shortname),$shortname
+		base64_encode($shortname),$inst->nice_name
 	);
+	*/
 	if (isset($tab['jobs'][$shortname]))
 		unset($tab['jobs'][$shortname]);
 	$i++;
@@ -187,6 +208,121 @@ echo '<input type="submit" value="Save" />';
 echo '</form>';
 
 include($FANNIE_ROOT.'src/footer.html');
+
+function simple_row($shortname,$nicename,$cmd,$tab,$i){
+	$ret = '<tr>';
+	$ret .= sprintf('<td><input type="checkbox" name="enabled[]" %s value="%d" /></td>',
+		(isset($tab['jobs'][$shortname])?'checked':''),$i);
+	
+	$ret .= sprintf('<td><input type="text" size="2" name="min[]" value="%s" /></td>',
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['min']:'0'));
+
+	$vals = array('*'=>'*',0=>'12AM');
+	for($i=1;$i<24;$i++){
+		$vals[$i] = (($i>12)?($i-12):$i) . (($i>11)?'PM':'AM');
+	}
+	$ret .= '<td><select name="hour[]">';
+	$matched = False;
+	foreach($vals as $k=>$v){
+		$ret .= sprintf('<option value="%s"',$k);
+		if ("$k" == (($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['hour']:'0')){
+			$ret .= ' selected';
+			$matched = True;
+		}
+		$ret .= '>'.$v.'</option>';
+	}
+	$ret .= '</select></td>';
+	if (!$matched) return False;
+
+	$vals = array('*'=>'*');
+	for($i=1;$i<32;$i++){
+		$vals[$i] = $i;
+	}
+	$ret .= '<td><select name="day[]">';
+	$matched = False;
+	foreach($vals as $k=>$v){
+		$ret .= sprintf('<option value="%s"',$k);
+		if ("$k" == (($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['day']:'1')){
+			$ret .= ' selected';
+			$matched = True;
+		}
+		$ret .= '>'.$v.'</option>';
+	}
+	$ret .= '</select></td>';
+	if (!$matched) return False;
+
+	$vals = array('*'=>'*');
+	for($i=1;$i<13;$i++){
+		$vals[$i] = date('M',mktime(0,0,0,$i,1,2000));
+	}
+	$ret .= '<td><select name="month[]">';
+	$matched = False;
+	foreach($vals as $k=>$v){
+		$ret .= sprintf('<option value="%s"',$k);
+		if ("$k" === (($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['month']:'1')){
+			$ret .= ' selected';
+			$matched = True;
+		}
+		$ret .= '>'.$v.'</option>';
+	}
+	$ret .= '</select></td>';
+	if (!$matched) return False;
+
+	$vals = array('*'=>'*');
+	$ts = time();
+	while(date('w',$ts) != 0)
+		$ts = date(0,0,0,date('n',$ts),date('j',$ts)+1,date('Y'));
+	for($i=0;$i<7;$i++){
+		$vals[$i] = date('D',$ts);
+		$ts = date(0,0,0,date('n',$ts),date('j',$ts)+1,date('Y'));
+	}
+	$ret .= '<td><select name="wday[]">';
+	$matched = False;
+	foreach($vals as $k=>$v){
+		$ret .= sprintf('<option value="%s"',$k);
+		if ("$k" === (($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['wday']:'*')){
+			$ret .= ' selected';
+			$matched = True;
+		}
+		$ret .= '>'.$v.'</option>';
+	}
+	$ret .= '</select></td>';
+	if (!$matched) return False;
+
+	$ret .= sprintf('
+		<td><input type="hidden" name="cmd[]" value="%s" />
+		<a href="" onclick="window.open(\'help.php?fn=%s\',\'Help\',\'height=200,width=500,scrollbars=1\');return false;" title="Help">%s</a></td>
+		</tr>',
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['cmd']:$cmd),
+		base64_encode($shortname),$nicename
+	);
+
+	return $ret;
+}
+function advanced_row($shortname,$nicename,$cmd,$tab,$i){
+	// defaults are set as once a year so someone doesn't accidentallly
+	// start firing a job off every minute
+	return sprintf('<tr>
+		<td><input type="checkbox" name="enabled[]" %s value="%d" /></td>
+		<td><input type="text" size="2" name="min[]" value="%s" /></td>
+		<td><input type="text" size="2" name="hour[]" value="%s" /></td>
+		<td><input type="text" size="2" name="day[]" value="%s" /></td>
+		<td><input type="text" size="2" name="month[]" value="%s" /></td>
+		<td><input type="text" size="2" name="wkdy[]" value="%s" /></td>
+		<td><input type="hidden" name="cmd[]" value="%s" />
+		<a href="" onclick="window.open(\'help.php?fn=%s\',\'Help\',\'height=200,width=500,scrollbars=1\');return false;" title="Help">%s</a></td>
+		</tr>',
+		(isset($tab['jobs'][$shortname])?'checked':''),$i,
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['min']:'0'),
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['hour']:'0'),
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['day']:'1'),
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['month']:'1'),
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['wkdy']:'*'),
+		(isset($tab['jobs'][$shortname])?$tab['jobs'][$shortname]['cmd']:$cmd),
+		base64_encode($shortname),$nicename
+	);
+
+}
 
 function scan_scripts($dir,$arr){
 	if (!is_dir($dir)){ 

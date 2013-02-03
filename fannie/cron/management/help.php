@@ -88,31 +88,47 @@ if ( ! file_exists($fn) ){
 	exit;
 }
 
-// Read the file into a string.
-$data = file_get_contents($fn);
-/* Parse into an array ($tokens) of arrays($t), one for each token where:
- * $t[0] the kind of token, e.g. T_COMMENT
- * $t[1] the content of the token, e.g. the entire comment.
- * $t[2] the line number in the file
-*/
-$tokens = token_get_all($data);
-$doc = "";
-foreach($tokens as $t){
-	if ($t[0] == T_COMMENT){
-		if (strstr($t[1],"HELP"))
-			$doc .= $t[1]."\n";
+$classname = rtrim(basename($fn),'.php');
+include($fn);
+$doc = '';
+if (class_exists($classname)){
+	$obj = new $classname();
+	$doc = '<h3>'.$obj->nice_name.'</h3>';
+	$doc .= '<p>'.$obj->help_info.'</p>';
+	$doc .= '<p><em>Scheduling hints</em>: '.$obj->scheduling_info.'</p>';
+	$doc .= '<p><em>Related Tasks</em>:<ul>';
+	foreach($obj->related_tasks as $task)
+		$doc .= '<li>'.$task.'</li>';
+	if (empty($obj->related_tasks))
+		$doc .= '<li>(none)</li>';
+	$doc .= '</ul></p>';
+}
+else {
+	// Read the file into a string.
+	$data = file_get_contents($fn);
+	/* Parse into an array ($tokens) of arrays($t), one for each token where:
+	 * $t[0] the kind of token, e.g. T_COMMENT
+	 * $t[1] the content of the token, e.g. the entire comment.
+	 * $t[2] the line number in the file
+	*/
+	$tokens = token_get_all($data);
+	$doc = "<pre>";
+	foreach($tokens as $t){
+		if ($t[0] == T_COMMENT){
+			if (strstr($t[1],"HELP"))
+				$doc .= $t[1]."\n";
+		}
 	}
+	$doc = '</pre>';
 }
 
 echo "<html><head><title>";
 echo basename($fn);
 echo "</title></head><body>";
-echo "<pre>";
 if (!empty($doc))
 	echo $doc;
 else
 	echo "Sorry, no documentation for this script: >{$fn}<";
-echo "</pre>";
 echo "<p><button onclick='window.close();'>Close Window</button></p>";
 echo "</body></html>";
 
