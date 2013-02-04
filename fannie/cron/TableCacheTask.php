@@ -52,7 +52,7 @@ class TableCacheTask extends FannieTask {
    batch movement reporting.';
 
 	function run(){
-		global $FANNIE_OP_DB, $FANNIE_TRANS_DB;
+		global $FANNIE_OP_DB, $FANNIE_TRANS_DB, $FANNIE_ARCHIVE_DB;
 		set_time_limit(0);
 
 		$sql = FannieDB::get($FANNIE_OP_DB);
@@ -74,6 +74,11 @@ class TableCacheTask extends FannieTask {
 		$chk = $sql->query("INSERT INTO CashPerformDay_cache SELECT * FROM CashPerformDay");
 		if ($chk === False)
 			echo $this->cron_msg("Could not load data for CashPerformDay_cache");
+
+		$sql->query("use $FANNIE_ARCHIVE_DB");
+		if ($sql->table_exists('reportDataCache')){
+			$sql->query('DELETE FROM reportDataCache WHERE expires < '.$sql->now());
+		}
 
 		echo $this->cron_msg("Success");
 	}

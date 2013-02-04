@@ -111,7 +111,11 @@ class MemberDatesFixTask extends FannieTask {
 			SET d.start_date=s.startdate,
 			d.end_date=CASE WHEN s.payments >= 100 
 				THEN '0000-00-00 00:00:00' 
-				ELSE DATE_ADD(s.startdate,INTERVAL 2 YEAR) END
+				ELSE 
+					CASE WHEN s.startdate < '2012-12-31 23:59:59'
+					THEN DATE_ADD(s.startdate,INTERVAL 2 YEAR) 
+					ELSE DATE_ADD(s.startdate,INTERVAL 1 YEAR) END
+				END
 			WHERE (d.start_date IS null OR d.start_date = '0000-00-00 00:00:00'
 				OR d.end_date > '1900-01-01 00:00:00')
 			AND s.payments > 0
@@ -120,7 +124,7 @@ class MemberDatesFixTask extends FannieTask {
 			$mdQ = "UPDATE memDates SET start_date=s.startdate,
 				end_date=CASE WHEN s.payments >=100 
 					THEN '1900-01-01 00:00:00'
-					ELSE dateadd(yy,2,s.startdate) END
+					ELSE dateadd(yy,1,s.startdate) END
 				FROM {$TRANS}newbalancestocktoday_test s
 				left join custdata as c on c.cardno=s.memnum
 				left join memDates as d on d.card_no=s.memnum
@@ -129,10 +133,10 @@ class MemberDatesFixTask extends FannieTask {
 		}
 		$sql->query($mdQ);
 
-		$sql->query("DELETE FROM custReceiptMessage WHERE msg_text LIKE 'EQUITY BALANCE% == %'");
+		$sql->query("DELETE FROM custReceiptMessage WHERE msg_text LIKE 'EQUITY OWED% == %'");
 
 		$msgQ = "INSERT custReceiptMessage
-			SELECT s.memnum,CONCAT('EQUITY BALANCE \$',s.payments,' == '
+			SELECT s.memnum,CONCAT('EQUITY OWED \$',100-s.payments,' == '
 				,'DUE DATE ',MONTH(d.end_date),'/',DAY(d.end_date),'/',YEAR(d.end_date)),
 				'WfcEquityMessage'
 			FROM {$TRANS}newBalanceStockToday_test AS s
