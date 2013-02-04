@@ -30,12 +30,30 @@ include($FANNIE_ROOT.'classlib2.0/lib/FormLib.php');
 class NonMovementReport extends FannieReportPage {
 
 	function preprocess(){
+		global $dbc;
 		/**
 		  Set the page header and title, enable caching
 		*/
 		$this->title = "Fannie: Non-Movement";
 		$this->header = "Non-Movement Report";
-		$this->report_cache = 'day';
+		$this->report_cache = 'none';
+
+		if (isset($_REQUEST['deleteItem'])){
+			$upc = get_form_value('deleteItem','');
+			$upc = str_pad($upc,13,'0',STR_PAD_LEFT);
+
+			$query = "DELETE FROM products WHERE upc=?";
+			$queryP = $dbc->prepare_statement($query);
+			$dbc->exec_statement($queryP, array($upc));
+
+			$query = "DELETE FROM productUser WHERE upc=?";
+			$queryP = $dbc->prepare_statement($query);
+			$dbc->exec_statement($queryP, array($upc));
+
+			$query = "DELETE FROM prodExtra WHERE upc=?";
+			$queryP = $dbc->prepare_statement($query);
+			$dbc->exec_statement($queryP, array($upc));
+		}
 
 		if (isset($_REQUEST['date1'])){
 			/**
@@ -46,7 +64,7 @@ class NonMovementReport extends FannieReportPage {
 			*/
 			$this->content_function = "report_content";
 			$this->has_menus(False);
-			$this->report_headers = array('UPC','Description','Dept#','Dept');
+			$this->report_headers = array('UPC','Description','Dept#','Dept','');
 		
 			/**
 			  Check if a non-html format has been requested
@@ -107,6 +125,14 @@ class NonMovementReport extends FannieReportPage {
 			$record[] = $row[1];
 			$record[] = $row[2];
 			$record[] = $row[3];
+			if ($this->report_format == 'html'){
+				$record[] = sprintf('<a href="%s&deleteItem=%s" 
+					onclick="return confirm(\'Delete %s %s?\');">
+					Delete this item</a>',$_SERVER['REQUEST_URI'],$row[0],
+					$row[0],$row[1]);
+			}
+			else
+				$record[] = '';
 			$ret[] = $record;
 		}
 
