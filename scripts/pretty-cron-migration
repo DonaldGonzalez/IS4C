@@ -20,46 +20,50 @@ fi
 crontab -u "$1" -l > fannie-crontab 2> /dev/null
 
 if [[ -s fannie-crontab ]]; then
-	sed -e "s/arbalance.sanitycheck.php/ArBalanceSanityCheckTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.ar.php/ArUpdateTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.update.members.php/CiviCrmTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/lanes.clean.php/CleanLanesTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/monthly.nabs.php/ClearNabsTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.clipboard.php/ClipboardTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.db.backup.php/DatabaseBackupTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.equity.php/EquityUpdateTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/manage.cache.php/FileCacheTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/homeless.specialorder.php/HomelessSpecialOrderTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.hq.dtrans.php/HqDTransTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/monthly.inventory.php/InventoryUpdateTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.lanesync.php/LaneSyncTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/memdates.fix.php/MemberDatesFixTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.memcoupon.php/MemCouponTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/demographics.monthly.php/DemographicsTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.pcbatch.php/PcBatchUpdateTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.dtrans.php/RotateDTransTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/notices.sales.php/SaleNoticeTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.batch.php/SalesBatchTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.specialorder.php/SpecialOrderTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/weekly.spins.php/SpinsTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.storepull.php/StorePullTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.table.snapshot.php/TableBackupTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.tablecache.php/TableCacheTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.virtualcoupon.php/VirtualCouponTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/nightly.voidhistory.php/VoidHistoryTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/GoECorrections.php/GoECorrectionsTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/archive.php/PUArchiveTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/compress_dept.php/PUDeptTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/compress_price.php/PUPriceTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/UpdateCustBalance.php/LPBalanceTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/UpdateUnpaidAR.php/LPUnpaidArTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/deactivate.ar.php/DeactivateArTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/deactivate.equity.php/DeactivateEquityTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/reactivate.ar.php/ReactivateArTask.php/g" -i ".backup" fannie-crontab	
-	sed -e "s/reactivate.equity.php/ReactivateEquityTask.php/g" -i ".backup" fannie-crontab	
+	# create a backup before the first change
+	sed -e "s/arbalance.sanitycheck.php/ArBalanceSanityCheckTask.php/g" --in-place=".backup" fannie-crontab	
+	# don't overwrite the backup on subsequent changes
+	sed -e "s/nightly.ar.php/ArUpdateTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.update.members.php/CiviCrmTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/lanes.clean.php/CleanLanesTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/monthly.nabs.php/ClearNabsTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.clipboard.php/ClipboardTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.db.backup.php/DatabaseBackupTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.equity.php/EquityUpdateTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/manage.cache.php/FileCacheTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/homeless.specialorder.php/HomelessSpecialOrderTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.hq.dtrans.php/HqDTransTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/monthly.inventory.php/InventoryUpdateTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.lanesync.php/LaneSyncTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/memdates.fix.php/MemberDatesFixTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.memcoupon.php/MemCouponTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/demographics.monthly.php/DemographicsTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.pcbatch.php/PcBatchUpdateTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.dtrans.php/RotateDTransTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/notices.sales.php/SaleNoticeTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.batch.php/SalesBatchTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.specialorder.php/SpecialOrderTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/weekly.spins.php/SpinsTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.storepull.php/StorePullTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.table.snapshot.php/TableBackupTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.tablecache.php/TableCacheTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.virtualcoupon.php/VirtualCouponTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/nightly.voidhistory.php/VoidHistoryTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/GoECorrections.php/GoECorrectionsTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/archive.php/PUArchiveTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/compress_dept.php/PUDeptTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/compress_price.php/PUPriceTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/UpdateCustBalance.php/LPBalanceTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/UpdateUnpaidAR.php/LPUnpaidArTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/deactivate.ar.php/DeactivateArTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/deactivate.equity.php/DeactivateEquityTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/reactivate.ar.php/ReactivateArTask.php/g" --in-place="" fannie-crontab	
+	sed -e "s/reactivate.equity.php/ReactivateEquityTask.php/g" --in-place="" fannie-crontab	
 
 	crontab -u "$1" fannie-crontab
 	echo "New crontab installed. The old one has been saved as \"fannie-crontab.backup\"."
+	echo "To undo these changes, run:"
+        echo "  crontab -u $1 fannie-crontab.backup"
 else
 	echo "No cron tab for $1"
 	echo "No migration necessary"
