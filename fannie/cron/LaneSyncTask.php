@@ -70,7 +70,7 @@ class LaneSyncTask extends FannieTask {
 		curl_setopt($products, CURLOPT_RETURNTRANSFER, True);
 		// r1 is apparently never used.
 		$r1 = curl_exec($products);
-		echo $this->cron_msg("Result of tablesync of products: >{$r1}<");
+		// r1 is a copy of the webpage. logging it makes a mess
 		curl_close($products);
 
 		// Other tables are done the same way, except as noted.
