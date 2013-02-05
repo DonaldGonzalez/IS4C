@@ -65,7 +65,7 @@ class ReactivateEquityTask extends FannieTask {
 		$sql->query($custQ);
 
 		$histQ = "insert into suspension_history
-			    select 'automatic',".$sql->now().",
+			    select 'equity paid',".$sql->now().",
 			    'Account reactivated',c.CardNo,0 from
 			    suspensions as s left join
 			    custdata as c on s.cardno=c.CardNo
