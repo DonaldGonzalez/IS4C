@@ -29,14 +29,14 @@
 class PriceOverrideAdminLogin 
 {
 
-    static public $adminLoginMsg = 'Login to alter price';
+    static public $adminLoginMsg 	= 'Login to alter price';
 
-    static public $adminLoginLevel = 30;
+    static public $adminLoginLevel 	= 30;
 
     static public function adminLoginCallback($success)
     {
         if ($success) {
-            return MiscLib::base_url().'gui-modules/priceOverride.php';
+            return MiscLib::base_url() . 'gui-modules/priceOverride.php';
         } else {
             return false;
         }

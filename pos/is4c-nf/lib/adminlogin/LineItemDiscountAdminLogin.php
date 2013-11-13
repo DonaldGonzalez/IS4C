@@ -29,14 +29,15 @@
 class LineItemDiscountAdminLogin 
 {
 
-    static public $adminLoginMsg = 'Login to give discount';
+    static public $adminLoginMsg 	= 'Login to give discount';
 
-    static public $adminLoginLevel = 30;
+    static public $adminLoginLevel 	= 30;
 
     static public function adminLoginCallback($success)
     {
         if ($success) {
-            $CORE_LOCAL->set('strRemembered', $CORE_LOCAL->get('strEntered'));
+            $CORE_LOCAL->set('strRemembered', 
+			$CORE_LOCAL->get('strEntered'))	;
             $CORE_LOCAL->set('msgrepeat', 1);
             return true;
         } else {

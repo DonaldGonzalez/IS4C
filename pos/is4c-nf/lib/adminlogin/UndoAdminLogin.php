@@ -29,14 +29,14 @@
 class UndoAdminLogin 
 {
 
-    static public $adminLoginMsg = 'Login to void transactions';
+    static public $adminLoginMsg 	= 'Login to void transactions';
 
-    static public $adminLoginLevel = 30;
+    static public $adminLoginLevel 	= 30;
 
     static public function adminLoginCallback($success)
     {
         if ($success) {
-            return MiscLib::base_url().'gui-modules/undo.php';
+            return MiscLib::base_url() . 'gui-modules/undo.php';
         } else {
             return false;
         }

@@ -36,13 +36,15 @@ class AgeApproveAdminLogin
     {
         global $CORE_LOCAL;
         if ($success) {
-            $CORE_LOCAL->set('refundComment', $CORE_LOCAL->get('strEntered'));    
-            $CORE_LOCAL->set('strRemembered', $CORE_LOCAL->get('strEntered'));    
-            $CORE_LOCAL->set('msgrepeat', 1);
-            $CORE_LOCAL->set('cashierAgeOverride', 1);
+            $CORE_LOCAL->set('refundComment', 
+			$CORE_LOCAL->get('strEntered'));    
+            $CORE_LOCAL->set('strRemembered', 
+			$CORE_LOCAL->get('strEntered'));    
+            $CORE_LOCAL->set('msgrepeat', 			1);
+            $CORE_LOCAL->set('cashierAgeOverride', 	1);
             return true;
         } else {
-            $CORE_LOCAL->set('cashierAgeOverride', 0);
+            $CORE_LOCAL->set('cashierAgeOverride', 	0);
             return false;
         }
     }

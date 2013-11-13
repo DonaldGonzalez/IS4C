@@ -29,14 +29,14 @@
 class DDDAdminLogin 
 {
 
-    public static $adminLoginMsg = 'DDD these items?';
+    public static $adminLoginMsg 	= 'DDD these items?';
     
-    public static $adminLoginLevel = 10;
+    public static $adminLoginLevel 	= 10;
 
     public static function adminLoginCallback($success)
     {
         if ($success) {
-            return MiscLib::base_url().'ajax-callbacks/ddd.php';
+            return MiscLib::base_url() . 'ajax-callbacks/ddd.php';
         } else {
             return false;
         }
